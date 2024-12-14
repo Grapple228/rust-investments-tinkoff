@@ -1,5 +1,9 @@
+// region:    --- Modules
+
 use crate::{config, Result};
 use tonic::transport::{Channel, ClientTlsConfig, Endpoint};
+
+// endregion: --- Modules
 
 /// Channel builder
 #[derive(Debug, Clone)]
@@ -33,8 +37,8 @@ impl ChannelBuilder {
         Ok(self)
     }
 
-    /// Builds channel
-    pub async fn build(self) -> Result<Channel> {
+    /// Creates connection with specified parameters
+    pub async fn connect(self) -> Result<Channel> {
         Ok(self.endpoint.connect().await?)
     }
 }

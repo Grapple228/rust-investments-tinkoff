@@ -1,5 +1,3 @@
-use tracing::warn;
-
 /// Extension trait for 'MetadataMap'
 pub trait MetadataExt {
     /// Safely inserts data into metadata.
@@ -29,7 +27,7 @@ impl MetadataExt for tonic::metadata::MetadataMap {
 
             true
         } else {
-            warn!("{} '{}'", err_message.into(), value);
+            tracing::warn!("{} '{}'", err_message.into(), value);
 
             false
         }

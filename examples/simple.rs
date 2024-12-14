@@ -1,30 +1,16 @@
-#![allow(unused)] // For beginning only.
-
-use std::{borrow::BorrowMut, str::FromStr};
-
 use investments_tinkoff::{
-    api::v1::{users_service_client::UsersServiceClient, GetAccountsRequest, TinkoffApi},
+    api::v1::{GetAccountsRequest, InvestApi},
     channel::ChannelBuilder,
-    config, generate_client, Result,
+    Result,
 };
-use tonic::{
-    metadata::MetadataValue,
-    service::{interceptor::InterceptedService, Interceptor},
-    transport::{channel, Channel, ClientTlsConfig, Identity},
-    Request,
-};
-use tracing::debug;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // -- Init logging and config
-    _ = investments_tinkoff::init();
-
     // -- Create api
-    let api = TinkoffApi::default().with_app_name("Grapple228.rust-investments-tinkoff");
+    let api = InvestApi::default().with_app_name("Grapple228.rust-investments-tinkoff");
 
     // -- Create channel
-    let channel = ChannelBuilder::default()?.build().await?;
+    let channel = ChannelBuilder::default()?.connect().await?;
 
     // -- Create users client
     let mut users_client = api.users(&channel).await?;

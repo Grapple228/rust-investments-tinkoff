@@ -1,11 +1,17 @@
+// region:    --- Modules
+
+// Modules
 #[path = "google.api.rs"]
 pub mod google_api;
+
 mod interceptor;
 mod protos;
 
+// -- Flatten
 pub use interceptor::TinkoffInterceptor;
 pub use protos::*;
 
+// -- Use
 use crate::{config, Result};
 use instruments_service_client::InstrumentsServiceClient;
 use market_data_service_client::MarketDataServiceClient;
@@ -16,11 +22,12 @@ use orders_stream_service_client::OrdersStreamServiceClient;
 use sandbox_service_client::SandboxServiceClient;
 use signal_service_client::SignalServiceClient;
 use stop_orders_service_client::StopOrdersServiceClient;
-use tonic::{
-    service::{interceptor::InterceptedService, Interceptor},
-    transport::{channel, Channel, ClientTlsConfig},
-};
+use tonic::{service::interceptor::InterceptedService, transport::Channel};
 use users_service_client::UsersServiceClient;
+
+// endregion: --- Modules
+
+// region:    --- Macroses
 
 /// Macro for generating clients.
 /// # Arguments
@@ -47,23 +54,25 @@ macro_rules! generate_client {
     };
 }
 
-/// Tinkoff API
+// endregion: --- Macroses
+
+/// Tinkoff API client to communicate with Tinkoff Invest API
 /// # Fields
 /// * `token` - API token
 /// * `app_name` - application name
 #[derive(Debug, Clone)]
-pub struct TinkoffApi {
+pub struct InvestApi {
     token: String,
     app_name: std::option::Option<String>,
 }
 
-impl Default for TinkoffApi {
+impl Default for InvestApi {
     fn default() -> Self {
         Self::with_token(&config().TINKOFF_TOKEN)
     }
 }
 
-impl TinkoffApi {
+impl InvestApi {
     // region:    --- Constructors
 
     /// Creates new TinkoffApi with token

@@ -1,11 +1,11 @@
-use tonic::{
-    metadata::{Ascii, MetadataValue},
-    service::Interceptor,
-};
-use tracing::warn;
+// region:    --- Modules
+
+use tonic::service::Interceptor;
 use uuid::Uuid;
 
 use crate::extensions::MetadataExt;
+
+// endregion: --- Modules
 
 pub struct TinkoffInterceptor {
     token: String,
@@ -24,7 +24,7 @@ impl Interceptor for TinkoffInterceptor {
         request: tonic::Request<()>,
     ) -> std::result::Result<tonic::Request<()>, tonic::Status> {
         let mut request = request;
-        let mut metadata = request.metadata_mut();
+        let metadata = request.metadata_mut();
 
         metadata.safe_append("authorization", &self.token, "Failed to insert token");
 

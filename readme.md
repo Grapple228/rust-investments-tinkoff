@@ -16,22 +16,19 @@ Add to your Cargo.toml
 
 ```toml
 [dependencies]
-investments_tinkoff = "0.1"
+investments_tinkoff = "0.2"
 ```
 
 Then use it like this:
 
 ```rust
-    // \examples\simple.rs
-
-    // -- Init logging and config
-    _ = investments_tinkoff::init();
+    // /examples/simple.rs
 
     // -- Create api
-    let api = TinkoffApi::default().with_app_name("Grapple228.rust-investments-tinkoff");
+    let api = InvestApi::default().with_app_name("Grapple228.rust-investments-tinkoff");
 
     // -- Create channel
-    let channel = ChannelBuilder::default()?.build().await?;
+    let channel = ChannelBuilder::default()?.connect().await?;
 
     // -- Create users client
     let mut users_client = api.users(&channel).await?;
@@ -50,9 +47,4 @@ Then use it like this:
 
 ## License
 
-Licensed under either of
-
-- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
-
-at your option.
+Licensed under MIT license ([LICENSE](LICENSE) or [LINK](http://opensource.org/licenses/MIT))
