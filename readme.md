@@ -25,7 +25,7 @@ Then use it like this:
     // \examples\simple.rs
 
     // -- Init logging and config
-    _ = investments-tinkoff::init();
+    _ = investments_tinkoff::init();
 
     // -- Create api
     let api = TinkoffApi::default().with_app_name("Grapple228.rust-investments-tinkoff");
