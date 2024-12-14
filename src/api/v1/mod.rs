@@ -67,6 +67,7 @@ pub struct InvestApi {
 }
 
 impl Default for InvestApi {
+    /// Creates new TinkoffApi with default token from config
     fn default() -> Self {
         Self::with_token(&config().TINKOFF_TOKEN)
     }
