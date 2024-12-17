@@ -1,5 +1,7 @@
 // region:    --- Modules
 
+use std::fmt::format;
+
 use tonic::service::Interceptor;
 use uuid::Uuid;
 
@@ -26,7 +28,11 @@ impl Interceptor for TinkoffInterceptor {
         let mut request = request;
         let metadata = request.metadata_mut();
 
-        metadata.safe_append("authorization", &self.token, "Failed to insert token");
+        metadata.safe_append(
+            "authorization",
+            format!("Bearer {}", self.token),
+            "Failed to insert token",
+        );
 
         metadata.safe_append(
             "x-request-id",
