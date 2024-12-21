@@ -1,47 +1,22 @@
-use investments_tinkoff::api::v1::{GetAccountsRequest, InvestApiTrait};
+use investments_tinkoff::api::v1::{
+    GetAccountsRequest, InterceptorData, InvestApiTrait, TinkoffInterceptor,
+};
 use investments_tinkoff::channel::ChannelBuilder;
-use investments_tinkoff::{api::v1::IntercemptorWithNew, extensions::MetadataExt};
 use investments_tinkoff::{config, Result};
-use tonic::service::Interceptor;
-
-// region:    --- Custom Interceptor
-
-pub struct CustomInterceptor {
-    token: String,
-}
-
-impl Interceptor for CustomInterceptor {
-    fn call(
-        &mut self,
-        request: tonic::Request<()>,
-    ) -> std::result::Result<tonic::Request<()>, tonic::Status> {
-        let mut request = request;
-        let metadata = request.metadata_mut();
-
-        // Do something with request
-
-        metadata.safe_append(
-            "authorization",
-            format!("Bearer {}", self.token),
-            "Failed to insert token",
-        );
-
-        Ok(request)
-    }
-}
-
-impl IntercemptorWithNew for CustomInterceptor {
-    fn new(token: String, _app_name: Option<String>) -> Self {
-        Self { token }
-    }
-}
-
-// endregion: --- Custom Interceptor
 
 // region:    --- Custom Api
 
 pub struct CustomApi {
     token: String,
+    app_name: Option<String>,
+}
+
+impl CustomApi {
+    /// Sets application name
+    pub fn with_app_name(mut self, app_name: impl Into<String>) -> Self {
+        self.app_name = Some(app_name.into());
+        self
+    }
 }
 
 impl Default for CustomApi {
@@ -51,13 +26,14 @@ impl Default for CustomApi {
     }
 }
 
-impl InvestApiTrait<CustomInterceptor> for CustomApi {
+impl InvestApiTrait<InterceptorData, TinkoffInterceptor> for CustomApi {
     // region:    --- Constructors
 
     /// Creates new CustomApi with token
     fn with_token(token: impl Into<String>) -> Self {
         Self {
             token: token.into(),
+            app_name: None,
         }
     }
 
@@ -65,12 +41,11 @@ impl InvestApiTrait<CustomInterceptor> for CustomApi {
 
     // region:    --- Getters
 
-    fn token(&self) -> String {
-        self.token.clone()
-    }
-
-    fn app_name(&self) -> std::option::Option<String> {
-        None
+    fn interceptor_data(&self) -> InterceptorData {
+        InterceptorData {
+            token: self.token.clone(),
+            app_name: self.app_name.clone(),
+        }
     }
 
     // endregion: --- Getters
@@ -81,7 +56,7 @@ impl InvestApiTrait<CustomInterceptor> for CustomApi {
 #[tokio::main]
 async fn main() -> Result<()> {
     // -- Create api
-    let api = CustomApi::default();
+    let api = CustomApi::default().with_app_name("Grapple228.rust-investments-tinkoff");
 
     // -- Create channel
     let channel = ChannelBuilder::default()?.connect().await?;

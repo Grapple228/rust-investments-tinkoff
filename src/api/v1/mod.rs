@@ -8,7 +8,7 @@ mod interceptor;
 mod protos;
 
 // -- Flatten
-pub use interceptor::{IntercemptorWithNew, TinkoffInterceptor};
+pub use interceptor::{IntercemptorWithNew, InterceptorData, TinkoffInterceptor};
 pub use protos::*;
 
 // -- Use
@@ -38,8 +38,7 @@ use users_service_client::UsersServiceClient;
 macro_rules! generate_client {
     ($func_name:ident, $client_type:ty, $interceptor_type:ty) => {
         fn $func_name(&self, channel: &Channel) -> Result<$client_type> {
-            let interceptor =
-                <$interceptor_type>::new(self.token().clone(), self.app_name().clone());
+            let interceptor = <$interceptor_type>::new(self.interceptor_data());
             let intercepted_channel = InterceptedService::new(channel.clone(), interceptor);
 
             Ok(<$client_type>::new(intercepted_channel))
@@ -47,8 +46,7 @@ macro_rules! generate_client {
     };
     ($func_name:ident, $client_type:ty) => {
         fn $func_name(&self, channel: &Channel) -> Result<$client_type> {
-            let interceptor =
-                TinkoffInterceptor::new(self.token().clone(), self.app_name().clone());
+            let interceptor = TinkoffInterceptor::new(self.interceptor_data());
             let intercepted_channel = InterceptedService::new(channel.clone(), interceptor);
 
             Ok(<$client_type>::new(intercepted_channel))
@@ -60,7 +58,7 @@ macro_rules! generate_client {
 
 // region:    --- Trait
 
-pub trait InvestApiTrait<I: IntercemptorWithNew> {
+pub trait InvestApiTrait<D, I: IntercemptorWithNew<D>> {
     // region:    --- Constructors
 
     /// Creates new Api with token
@@ -69,10 +67,10 @@ pub trait InvestApiTrait<I: IntercemptorWithNew> {
     // endregion: --- Constructors
 
     // region:    --- Getters
-    /// Returns token
-    fn token(&self) -> String;
-    /// Returns application name
-    fn app_name(&self) -> std::option::Option<String>;
+
+    /// Creates interceptor data for modifying request
+    fn interceptor_data(&self) -> D;
+
     // endregion: --- Getters
 
     // region:    --- Clients
@@ -145,8 +143,8 @@ pub trait InvestApiTrait<I: IntercemptorWithNew> {
 /// * `app_name` - application name
 #[derive(Debug, Clone)]
 pub struct InvestApi {
-    token: String,
-    app_name: std::option::Option<String>,
+    pub token: String,
+    pub app_name: std::option::Option<String>,
 }
 
 impl Default for InvestApi {
@@ -156,7 +154,7 @@ impl Default for InvestApi {
     }
 }
 
-impl InvestApiTrait<TinkoffInterceptor> for InvestApi {
+impl InvestApiTrait<InterceptorData, TinkoffInterceptor> for InvestApi {
     // region:    --- Constructors
 
     /// Creates new TinkoffApi with token
@@ -171,12 +169,11 @@ impl InvestApiTrait<TinkoffInterceptor> for InvestApi {
 
     // region:    --- Getters
 
-    fn token(&self) -> String {
-        self.token.clone()
-    }
-
-    fn app_name(&self) -> std::option::Option<String> {
-        self.app_name.clone()
+    fn interceptor_data(&self) -> InterceptorData {
+        InterceptorData {
+            token: self.token.clone(),
+            app_name: self.app_name.clone(),
+        }
     }
 
     // endregion: --- Getters

@@ -30,7 +30,7 @@ TINKOFF_TOKEN = <token>
 
 ```toml
 [dependencies]
-investments_tinkoff = "*"
+investments_tinkoff = "0.4.*"
 tonic = "0.12"
 ```
 
@@ -38,10 +38,10 @@ tonic = "0.12"
 
 See `Environment variables` section above
 
-### 3: Then use it like this:
+### 3: Then use it like this
 
 ```rust
-    // /examples/simple.rs
+    // Code from /examples/simple.rs
 
     // -- Create api
     let api = InvestApi::default().with_app_name("Grapple228.rust-investments-tinkoff");
