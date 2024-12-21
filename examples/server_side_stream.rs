@@ -16,7 +16,7 @@ async fn main() -> Result<()> {
     let channel = ChannelBuilder::default()?.connect().await?;
 
     // -- Create market data stream
-    let mut market_data_stream = api.market_data_stream(&channel).await?;
+    let mut market_data_stream = api.market_data_stream(&channel)?;
 
     // -- Create request
 

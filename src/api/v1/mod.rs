@@ -37,7 +37,7 @@ use users_service_client::UsersServiceClient;
 #[macro_export]
 macro_rules! generate_client {
     ($func_name:ident, $client_type:ty, $interceptor_type:ty) => {
-        pub async fn $func_name(&self, channel: &Channel) -> Result<$client_type> {
+        pub fn $func_name(&self, channel: &Channel) -> Result<$client_type> {
             let interceptor = <$interceptor_type>::new(self.token.clone(), self.app_name.clone());
             let intercepted_channel = InterceptedService::new(channel.clone(), interceptor);
 
@@ -45,7 +45,7 @@ macro_rules! generate_client {
         }
     };
     ($func_name:ident, $client_type:ty) => {
-        pub async fn $func_name(&self, channel: &Channel) -> Result<$client_type> {
+        pub fn $func_name(&self, channel: &Channel) -> Result<$client_type> {
             let interceptor = TinkoffInterceptor::new(self.token.clone(), self.app_name.clone());
             let intercepted_channel = InterceptedService::new(channel.clone(), interceptor);
 

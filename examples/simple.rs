@@ -13,7 +13,7 @@ async fn main() -> Result<()> {
     let channel = ChannelBuilder::default()?.connect().await?;
 
     // -- Create users client
-    let mut users_client = api.users(&channel).await?;
+    let mut users_client = api.users(&channel)?;
 
     // -- Create request
     let request = tonic::Request::new(GetAccountsRequest { status: None });

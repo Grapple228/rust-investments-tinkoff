@@ -1,7 +1,5 @@
 // region:    --- Modules
 
-use std::fmt::format;
-
 use tonic::service::Interceptor;
 use uuid::Uuid;
 
