@@ -1,7 +1,7 @@
 use investments_tinkoff::{
     api::v1::{
-        CandleInstrument, InvestApi, MarketDataServerSideStreamRequest, PingDelaySettings,
-        SubscribeCandlesRequest, SubscriptionAction, SubscriptionInterval,
+        CandleInstrument, InvestApi, InvestApiTrait, MarketDataServerSideStreamRequest,
+        PingDelaySettings, SubscribeCandlesRequest, SubscriptionAction, SubscriptionInterval,
     },
     channel::ChannelBuilder,
     Result,

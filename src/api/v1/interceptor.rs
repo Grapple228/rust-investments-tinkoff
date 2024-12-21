@@ -7,13 +7,20 @@ use crate::extensions::MetadataExt;
 
 // endregion: --- Modules
 
+/// Interceptor that requires new method
+pub trait IntercemptorWithNew: Interceptor {
+    /// Creates new interceptor
+    fn new(token: String, app_name: Option<String>) -> Self;
+}
+
+/// Custom implementation for Tinkoff Interceptor
 pub struct TinkoffInterceptor {
     token: String,
     app_name: Option<String>,
 }
 
-impl TinkoffInterceptor {
-    pub fn new(token: String, app_name: Option<String>) -> Self {
+impl IntercemptorWithNew for TinkoffInterceptor {
+    fn new(token: String, app_name: Option<String>) -> Self {
         Self { token, app_name }
     }
 }

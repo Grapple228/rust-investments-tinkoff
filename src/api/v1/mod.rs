@@ -8,7 +8,7 @@ mod interceptor;
 mod protos;
 
 // -- Flatten
-pub use interceptor::TinkoffInterceptor;
+pub use interceptor::{IntercemptorWithNew, TinkoffInterceptor};
 pub use protos::*;
 
 // -- Use
@@ -37,16 +37,18 @@ use users_service_client::UsersServiceClient;
 #[macro_export]
 macro_rules! generate_client {
     ($func_name:ident, $client_type:ty, $interceptor_type:ty) => {
-        pub fn $func_name(&self, channel: &Channel) -> Result<$client_type> {
-            let interceptor = <$interceptor_type>::new(self.token.clone(), self.app_name.clone());
+        fn $func_name(&self, channel: &Channel) -> Result<$client_type> {
+            let interceptor =
+                <$interceptor_type>::new(self.token().clone(), self.app_name().clone());
             let intercepted_channel = InterceptedService::new(channel.clone(), interceptor);
 
             Ok(<$client_type>::new(intercepted_channel))
         }
     };
     ($func_name:ident, $client_type:ty) => {
-        pub fn $func_name(&self, channel: &Channel) -> Result<$client_type> {
-            let interceptor = TinkoffInterceptor::new(self.token.clone(), self.app_name.clone());
+        fn $func_name(&self, channel: &Channel) -> Result<$client_type> {
+            let interceptor =
+                TinkoffInterceptor::new(self.token().clone(), self.app_name().clone());
             let intercepted_channel = InterceptedService::new(channel.clone(), interceptor);
 
             Ok(<$client_type>::new(intercepted_channel))
@@ -55,6 +57,87 @@ macro_rules! generate_client {
 }
 
 // endregion: --- Macroses
+
+// region:    --- Trait
+
+pub trait InvestApiTrait<I: IntercemptorWithNew> {
+    // region:    --- Constructors
+
+    /// Creates new Api with token
+    fn with_token(token: impl Into<String>) -> Self;
+
+    // endregion: --- Constructors
+
+    // region:    --- Getters
+    /// Returns token
+    fn token(&self) -> String;
+    /// Returns application name
+    fn app_name(&self) -> std::option::Option<String>;
+    // endregion: --- Getters
+
+    // region:    --- Clients
+    generate_client!(
+        instruments,
+        InstrumentsServiceClient<InterceptedService<Channel, I>>,
+        I
+    );
+
+    generate_client!(
+        market_data,
+        MarketDataServiceClient<InterceptedService<Channel, I>>,
+        I
+    );
+
+    generate_client!(
+        market_data_stream,
+        MarketDataStreamServiceClient<InterceptedService<Channel, I>>,
+        I
+    );
+
+    generate_client!(
+        operations,
+        OperationsServiceClient<InterceptedService<Channel, I>>,
+        I
+    );
+
+    generate_client!(
+        orders,
+        OrdersServiceClient<InterceptedService<Channel, I>>,
+        I
+    );
+
+    generate_client!(
+        orders_stream,
+        OrdersStreamServiceClient<InterceptedService<Channel, I>>,
+        I
+    );
+
+    generate_client!(
+        sandbox,
+        SandboxServiceClient<InterceptedService<Channel, I>>,
+        I
+    );
+
+    generate_client!(
+        signal,
+        SignalServiceClient<InterceptedService<Channel, I>>,
+        I
+    );
+
+    generate_client!(
+        stop_orders,
+        StopOrdersServiceClient<InterceptedService<Channel, I>>,
+        I
+    );
+
+    generate_client!(users, UsersServiceClient<InterceptedService<Channel, I>>, I);
+
+    // endregion: --- Clients
+}
+
+// endregion: --- Trait
+
+// region:    --- Invest Api
 
 /// Tinkoff API client to communicate with Tinkoff Invest API
 /// # Fields
@@ -73,76 +156,38 @@ impl Default for InvestApi {
     }
 }
 
-impl InvestApi {
+impl InvestApiTrait<TinkoffInterceptor> for InvestApi {
     // region:    --- Constructors
 
     /// Creates new TinkoffApi with token
-    pub fn with_token(token: impl Into<String>) -> Self {
+    fn with_token(token: impl Into<String>) -> Self {
         Self {
             token: token.into(),
             app_name: None,
         }
     }
 
+    // endregion: --- Constructors
+
+    // region:    --- Getters
+
+    fn token(&self) -> String {
+        self.token.clone()
+    }
+
+    fn app_name(&self) -> std::option::Option<String> {
+        self.app_name.clone()
+    }
+
+    // endregion: --- Getters
+}
+
+impl InvestApi {
     /// Sets application name
     pub fn with_app_name(mut self, app_name: impl Into<String>) -> Self {
         self.app_name = Some(app_name.into());
         self
     }
-
-    // endregion: --- Constructors
-
-    // region:    --- Clients
-
-    generate_client!(
-        instruments,
-        InstrumentsServiceClient<InterceptedService<Channel, TinkoffInterceptor>>
-    );
-
-    generate_client!(
-        market_data,
-        MarketDataServiceClient<InterceptedService<Channel, TinkoffInterceptor>>
-    );
-
-    generate_client!(
-        market_data_stream,
-        MarketDataStreamServiceClient<InterceptedService<Channel, TinkoffInterceptor>>
-    );
-
-    generate_client!(
-        operations,
-        OperationsServiceClient<InterceptedService<Channel, TinkoffInterceptor>>
-    );
-
-    generate_client!(
-        orders,
-        OrdersServiceClient<InterceptedService<Channel, TinkoffInterceptor>>
-    );
-
-    generate_client!(
-        orders_stream,
-        OrdersStreamServiceClient<InterceptedService<Channel, TinkoffInterceptor>>
-    );
-
-    generate_client!(
-        sandbox,
-        SandboxServiceClient<InterceptedService<Channel, TinkoffInterceptor>>
-    );
-
-    generate_client!(
-        signal,
-        SignalServiceClient<InterceptedService<Channel, TinkoffInterceptor>>
-    );
-
-    generate_client!(
-        stop_orders,
-        StopOrdersServiceClient<InterceptedService<Channel, TinkoffInterceptor>>
-    );
-
-    generate_client!(
-        users,
-        UsersServiceClient<InterceptedService<Channel, TinkoffInterceptor>>
-    );
-
-    // endregion: --- Clients
 }
+
+// endregion: --- Invest Api

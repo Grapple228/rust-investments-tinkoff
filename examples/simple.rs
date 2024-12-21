@@ -1,5 +1,5 @@
 use investments_tinkoff::{
-    api::v1::{GetAccountsRequest, InvestApi},
+    api::v1::{GetAccountsRequest, InvestApi, InvestApiTrait},
     channel::ChannelBuilder,
     Result,
 };
