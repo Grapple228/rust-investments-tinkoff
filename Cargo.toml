@@ -1,6 +1,6 @@
 [package]
 name = "investments-tinkoff"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/Grapple228/rust-investments-tinkoff"
@@ -20,6 +20,7 @@ tonic = {version = "0.12", features = ["tls", "tls-roots", "gzip"] }
 prost = "0.13"
 prost-types = "0.13"
 uuid = { version = "1", features = ["fast-rng", "v4"] }
+chrono = "0.4"
 
 [dev-dependencies]
 tonic-build = { version = "0.12", features = ["prost"] }

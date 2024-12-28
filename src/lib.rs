@@ -3,6 +3,7 @@
 // -- Modules
 pub mod api;
 pub mod channel;
+pub mod datetime;
 pub mod extensions;
 
 mod config;
