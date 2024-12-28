@@ -2,6 +2,9 @@
 
 use derive_more::derive::From;
 
+#[cfg(feature = "datetime")]
+use crate::datetime;
+
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, From)]
@@ -9,6 +12,10 @@ pub enum Error {
     // -- Config
     ConfigMissingEnv(&'static str),
     ConfigWrongFormat(&'static str),
+
+    // -- Modules
+    #[cfg(feature = "datetime")]
+    DatetimeError(datetime::Error),
 
     // -- Externals
     #[from]

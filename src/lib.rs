@@ -3,7 +3,8 @@
 // -- Modules
 pub mod api;
 pub mod channel;
-pub mod datetime;
+#[cfg(feature = "datetime")]
+mod datetime;
 pub mod extensions;
 
 mod config;
@@ -11,6 +12,8 @@ mod error;
 
 // -- Flatten
 pub use config::config;
+#[cfg(feature = "datetime")]
+pub use datetime::DateTime;
 pub use error::{Error, Result};
 
 // endregion: --- Modules

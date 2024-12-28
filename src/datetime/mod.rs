@@ -1,4 +1,7 @@
-use chrono::{NaiveDate, NaiveTime, Timelike};
+mod error;
+
+use chrono::{NaiveDate, NaiveTime, Timelike, Utc};
+pub use error::{Error, Result};
 use prost_types::Timestamp;
 
 /// Wrapper for `prost_types::Timestamp`
@@ -7,6 +10,17 @@ pub struct DateTime {
     timestamp: Timestamp,
 }
 
+impl core::fmt::Display for DateTime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Ok(date) = self.to_utc_string() {
+            write!(f, "{}", date)
+        } else {
+            write!(f, "{}", self.timestamp)
+        }
+    }
+}
+
+// Constructors
 impl DateTime {
     /// Creates a new `DateTime` for current time
     pub fn now() -> DateTime {
@@ -40,10 +54,31 @@ impl DateTime {
     pub fn from_timestamp(timestamp: Timestamp) -> DateTime {
         DateTime { timestamp }
     }
+}
 
+impl DateTime {
     /// Returns current timestamp
     pub fn timestamp(&self) -> Timestamp {
         self.timestamp
+    }
+
+    /// Add hours, minutes and seconds to current timestamp
+    pub fn add_hms(&self, hours: i64, minutes: i64, seconds: i64) -> DateTime {
+        let mut timestamp = self.timestamp;
+        timestamp.seconds += hours * 3600 + minutes * 60 + seconds;
+
+        DateTime { timestamp }
+    }
+
+    /// Add year, month and day to current timestamp
+    pub fn add_ymd(&self, year: i32, month: u32, day: u32) -> DateTime {
+        let mut timestamp = self.timestamp;
+
+        if let Some(date) = NaiveDate::from_ymd_opt(year, month, day) {
+            timestamp.seconds += date.and_time(NaiveTime::default()).and_utc().timestamp();
+        }
+
+        DateTime { timestamp }
     }
 
     /// Add minutes to current timestamp
@@ -79,10 +114,42 @@ impl DateTime {
     }
 }
 
+// To String conversions
+impl DateTime {
+    /// Converts `DateTime` to RFC3339 string
+    pub fn to_utc_string(&self) -> Result<String> {
+        let timestamp = self.timestamp();
+
+        if let Some(utc_datetime) =
+            chrono::DateTime::<Utc>::from_timestamp(timestamp.seconds, timestamp.nanos as u32)
+        {
+            Ok(utc_datetime.to_rfc3339())
+        } else {
+            Err(Error::TimestampConversionError)
+        }
+    }
+
+    /// Converts `DateTime` to date string (YYYY-MM-DD)
+    pub fn to_utc_date_string(&self) -> Result<String> {
+        let timestamp = self.timestamp();
+
+        if let Some(utc_datetime) =
+            chrono::DateTime::<Utc>::from_timestamp(timestamp.seconds, timestamp.nanos as u32)
+        {
+            Ok(utc_datetime.date_naive().to_string())
+        } else {
+            Err(Error::TimestampConversionError)
+        }
+    }
+}
+
 // region:    --- Tests
 
 #[cfg(test)]
 mod tests {
+    /// Unix timestamp for 2022-01-01
+    const YWD_SECONDS: i64 = 1640995200;
+
     type Error = Box<dyn std::error::Error>;
     type Result<T> = core::result::Result<T, Error>; // For tests.
 
@@ -91,8 +158,38 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_to_string_ok() -> Result<()> {
+        let fx_result = String::from("2022-01-01T05:30:34+00:00");
+
+        let datetime = DateTime::from_timestamp(Timestamp {
+            seconds: YWD_SECONDS,
+            nanos: 0,
+        })
+        .add_hms(5, 30, 34);
+
+        assert_eq!(datetime.to_utc_string()?, fx_result);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_to_date_string_ok() -> Result<()> {
+        let fx_result = String::from("2022-01-01");
+
+        let datetime = DateTime::from_timestamp(Timestamp {
+            seconds: YWD_SECONDS,
+            nanos: 0,
+        })
+        .add_hours(5)
+        .add_minutes(30);
+
+        assert_eq!(datetime.to_utc_date_string()?, fx_result);
+
+        Ok(())
+    }
+
+    #[test]
     fn test_datetime_from_ymd_ok() -> Result<()> {
-        const YWD_SECONDS: i64 = 1640995200;
         let fx_date = DateTime::from_ymd(2022, 1, 1).expect("Failed to create datetime");
 
         assert_eq!(fx_date.timestamp().seconds, YWD_SECONDS);
