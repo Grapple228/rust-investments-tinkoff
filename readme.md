@@ -30,7 +30,7 @@ TINKOFF_TOKEN = <token>
 
 ```toml
 [dependencies]
-investments_tinkoff = "0.4.*"
+investments_tinkoff = "0.5.*"
 tonic = "0.12"
 ```
 

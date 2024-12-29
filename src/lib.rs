@@ -3,11 +3,11 @@
 // -- Modules
 pub mod api;
 pub mod channel;
-#[cfg(feature = "datetime")]
-mod datetime;
 pub mod extensions;
 
 mod config;
+#[cfg(feature = "datetime")]
+mod datetime;
 mod error;
 
 // -- Flatten

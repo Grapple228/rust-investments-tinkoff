@@ -5,9 +5,35 @@ pub use error::{Error, Result};
 use prost_types::Timestamp;
 
 /// Wrapper for `prost_types::Timestamp`
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct DateTime {
     timestamp: Timestamp,
+}
+
+impl PartialOrd for DateTime {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        let left = self.timestamp();
+        let right = other.timestamp();
+
+        if left.seconds == right.seconds {
+            left.nanos.partial_cmp(&right.nanos)
+        } else {
+            left.seconds.partial_cmp(&right.seconds)
+        }
+    }
+}
+
+impl Ord for DateTime {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        let left = self.timestamp();
+        let right = other.timestamp();
+
+        if left.seconds == right.seconds {
+            left.nanos.cmp(&right.nanos)
+        } else {
+            left.seconds.cmp(&right.seconds)
+        }
+    }
 }
 
 impl core::fmt::Display for DateTime {
